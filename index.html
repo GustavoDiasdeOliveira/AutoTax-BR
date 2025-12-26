@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Calculadora de Impostos de Veículos - 2026+</title>
+    <style>
+        /* =======================
+   LIGHT MODE (PADRÃO)
+======================= */
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --panel: #f1f5f9;
+            --text: #0f172a;
+            --muted: #475569;
+            --accent: #16a34a;
+            --accent-strong: #15803d;
+            --danger: #dc2626;
+            --border: rgba(15, 23, 42, 0.1);
+            --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+            --input-bg: #ffffff;
+            --input-text: #0f172a;
+            --input-border: rgba(15, 23, 42, 0.2);
+        }
+
+        /* =======================
+   DARK MODE
+======================= */
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #111827;
+            --panel: #0b1224;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --accent: #38d48f;
+            --accent-strong: #16a34a;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.06);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            --input-bg: #0b1224;
+            --input-text: #e5e7eb;
+            --input-border: rgba(255, 255, 255, 0.12);
+        }
+
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 20%, rgba(56, 212, 143, 0.08), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(56, 140, 212, 0.08), transparent 40%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 32px 18px 48px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .shell {
+            width: 100%;
+            max-width: 1080px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: clamp(24px, 3vw, 32px);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        header h1 span {
+            display: inline-flex;
+            width: 12px;
+            height: 32px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+            border-radius: 12px;
+        }
+
+        header p {
+            color: var(--muted);
+            font-size: 14px;
+            max-width: 560px;
+            line-height: 1.5;
+        }
+
+        .theme-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 18px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, var(--card), var(--panel));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .section-title small {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        textarea {
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--muted);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+        }
+
+
+        .muted {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 30px -12px rgba(56, 212, 143, 0.35);
+        }
+
+        .primary {
+            background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+            color: #0b1224;
+        }
+
+        .ghost {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .results {
+            display: grid;
+            gap: 12px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .result-row strong {
+            font-size: 16px;
+        }
+
+        .total {
+            border-color: rgba(56, 212, 143, 0.35);
+            background: linear-gradient(120deg, rgba(56, 212, 143, 0.08), rgba(56, 140, 212, 0.04));
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(56, 212, 143, 0.15);
+            color: #bbf7d0;
+            border: 1px solid rgba(56, 212, 143, 0.4);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .warn {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fecdd3;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .info-box {
+            margin-top: 10px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 960px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 20px 14px 36px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .result-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <header>
+            <div>
+                <h1><span></span> Calculadora de Impostos de Veículos</h1>
+                <p>Simule rapidamente IPVA, Licenciamento e DPVAT a partir de 2026. Inclui a nova regra de isenção de
+                    IPVA para motos até 180cc.</p>
+            </div>
+            <button id="theme-toggle" title="Alternar tema" class="theme-btn">
+                <i class="bi bi-sun-fill"></i>
+            </button>
+
+
+        </header>
+
+        <div class="grid">
+            <section class="card">
+                <div class="section-title">Dados do veículo <small>Campos validados em tempo real</small></div>
+                <form id="tax-form" novalidate>
+                    <label>
+                        Nome / Modelo do veículo
+                        <input type="text" id="vehicle-name" placeholder="Ex.: Honda CG 160 Fan" required />
+                    </label>
+
+                    <label>
+                        Ano do veículo
+                        <input type="number" id="vehicle-year" placeholder="Ex.: 2025" min="1980" max="2026" required />
+                    </label>
+
+
+                    <label>
+                        Tipo de veículo
+                        <select id="vehicle-type" required>
+                            <option value="carro">Carro</option>
+                            <option value="moto">Moto</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Ano de referência (>= 2026)
+                        <input type="number" id="year" min="2026" value="2026" required />
+                    </label>
+
+                    <label>
+                        Estado (UF)
+                        <select id="state" required>
+                            <option value="">Selecione</option>
+                        </select>
+                        <span class="muted">As alíquotas podem ser ajustadas no código.</span>
+                    </label>
+
+                    <label>
+                        Valor do veículo (R$)
+                        <input type="number" id="vehicle-value" min="1000" step="500" placeholder="Ex.: R$ 45.000,00"
+                            required />
+                    </label>
+
+                    <label id="cc-wrapper" style="display:none;">
+                        Cilindrada da moto (cc)
+                        <input type="number" id="engine-cc" min="50" step="10" placeholder="Ex.: 160" />
+                    </label>
+
+                    <div class="actions">
+                        <button class="primary" type="submit">Calcular</button>
+                        <button class="ghost" type="button" id="reset-btn">Limpar</button>
+                    </div>
+                </form>
+                <div class="info-box">
+                    Regras principais:
+                    <ul style="margin-top: 8px; padding-left: 18px; line-height: 1.6;">
+                        <li>IPVA baseado no valor do veículo e alíquota do estado.</li>
+                        <li>Motos até 180cc: isenção total de IPVA a partir de 2026.</li>
+                        <li>Licenciamento e DPVAT estimados de forma conservadora.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="section-title">Resultados <small>aproximados!</small></div>
+                <div class="results" id="results">
+                    <div class="result-row">
+                        <span>IPVA</span>
+                        <strong id="ipva-value">R$ 0,00</strong>
+                    </div>
+                    <div class="result-row">
+                        <span>Licenciamento</span>
+                        <strong id="licenciamento-value">R$ 0,00</strong>
+                    </div>
+                    <div class="result-row">
+                        <span>DPVAT</span>
+                        <strong id="dpvat-value">R$ 0,00</strong>
+                    </div>
+                    <div class="result-row total">
+                        <span>Total anual</span>
+                        <strong id="total-value">R$ 0,00</strong>
+                    </div>
+                    <div id="note-area"></div>
+                </div>
+                <p class="footer-note">
+                    Simulação educativa: valores podem variar conforme legislação estadual e atualizações oficiais.
+                    Ajuste as tabelas no código para refletir mudanças futuras.
+                </p>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const ipvaAliquotas = {
+            AC: 3, AL: 3, AM: 3, AP: 3,
+            BA: 2.5, CE: 3, DF: 3.5, ES: 2,
+            GO: 3.45, MA: 3, MG: 4, MS: 3,
+            MT: 3, PA: 2.5, PB: 2.5, PE: 3,
+            PI: 2.5, PR: 3.5, RJ: 4, RN: 3,
+            RO: 3, RR: 3, RS: 3, SC: 2,
+            SE: 2.5, SP: 4, TO: 2,
+        };
+
+        // Estados com isenção CONFIRMADA para motos até 180cc (2026+)
+        const estadosIsencaoMoto180 = ["SP", "MG", "PR", "RS", "SC", "ES"];
+
+        const licenciamentoPorEstado = {
+            SP: 160,
+            RJ: 186,
+            MG: 160,
+            PR: 170,
+            SC: 150,
+            RS: 165,
+            default: 150,
+        };
+
+        const dpvatValores = {
+            carro: 25,
+            moto: 35,
+        };
+
+        const stateSelect = document.getElementById("state");
+        const typeSelect = document.getElementById("vehicle-type");
+        const yearRefInput = document.getElementById("year");
+        const vehicleYearInput = document.getElementById("vehicle-year");
+        const vehicleNameInput = document.getElementById("vehicle-name");
+        const valueInput = document.getElementById("vehicle-value");
+        const ccWrapper = document.getElementById("cc-wrapper");
+        const ccInput = document.getElementById("engine-cc");
+        const noteArea = document.getElementById("note-area");
+
+        function preencherEstados() {
+            Object.keys(ipvaAliquotas).forEach(uf => {
+                const opt = document.createElement("option");
+                opt.value = uf;
+                opt.textContent = `${uf} — ${ipvaAliquotas[uf]}%`;
+                stateSelect.appendChild(opt);
+            });
+        }
+
+        function formatCurrency(v) {
+            return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+        }
+
+        function calcularIPVA({ tipo, uf, valor, cilindrada, anoRef }) {
+            if (
+                tipo === "moto" &&
+                cilindrada <= 180 &&
+                anoRef >= 2026 &&
+                estadosIsencaoMoto180.includes(uf)
+            ) {
+                return { valor: 0, isento: true };
+            }
+
+            const aliquota = ipvaAliquotas[uf] || 0;
+            return { valor: (valor * aliquota) / 100, isento: false };
+        }
+
+        function calcularLicenciamento(uf) {
+            return licenciamentoPorEstado[uf] ?? licenciamentoPorEstado.default;
+        }
+
+        function calcularDPVAT(tipo) {
+            return dpvatValores[tipo] ?? 0;
+        }
+
+        function limparNotas() {
+            noteArea.innerHTML = "";
+        }
+
+        function mostrarNota(msg, warn = false) {
+            const div = document.createElement("div");
+            div.className = `badge ${warn ? "warn" : ""}`;
+            div.textContent = msg;
+            noteArea.appendChild(div);
+        }
+
+        function atualizarResultados(ipva, lic, dpvat, nome, anoVeiculo) {
+            document.getElementById("ipva-value").textContent = formatCurrency(ipva.valor);
+            document.getElementById("licenciamento-value").textContent = formatCurrency(lic);
+            document.getElementById("dpvat-value").textContent = formatCurrency(dpvat);
+            document.getElementById("total-value").textContent =
+                formatCurrency(ipva.valor + lic + dpvat);
+
+            mostrarNota(`${nome} — Ano ${anoVeiculo}`);
+        }
+
+        function handleTipoChange() {
+            ccWrapper.style.display = typeSelect.value === "moto" ? "flex" : "none";
+            ccInput.required = typeSelect.value === "moto";
+        }
+
+        document.getElementById("tax-form").addEventListener("submit", e => {
+            e.preventDefault();
+            limparNotas();
+
+            const dados = {
+                nome: vehicleNameInput.value.trim(),
+                anoVeiculo: Number(vehicleYearInput.value),
+                anoRef: Number(yearRefInput.value),
+                tipo: typeSelect.value,
+                uf: stateSelect.value,
+                valor: Number(valueInput.value),
+                cilindrada: Number(ccInput.value),
+            };
+
+            if (!dados.nome || !dados.uf || !dados.valor || dados.anoRef < 2026) {
+                alert("Preencha todos os campos corretamente.");
+                return;
+            }
+
+            const ipva = calcularIPVA(dados);
+            const lic = calcularLicenciamento(dados.uf);
+            const dpvat = calcularDPVAT(dados.tipo);
+
+            atualizarResultados(ipva, lic, dpvat, dados.nome, dados.anoVeiculo);
+
+            if (ipva.isento) {
+                mostrarNota("IPVA isento para moto até 180cc neste estado (2026+)");
+            } else {
+                mostrarNota(`IPVA ${ipvaAliquotas[dados.uf]}% aplicado`);
+            }
+        });
+
+        document.getElementById("reset-btn").addEventListener("click", () => {
+            document.getElementById("tax-form").reset();
+            yearRefInput.value = 2026;
+            handleTipoChange();
+            limparNotas();
+        });
+
+        preencherEstados();
+        handleTipoChange();
+    </script>
+
+
+    <script>
+        const themeToggle = document.getElementById("theme-toggle");
+        const icon = themeToggle.querySelector("i");
+        const root = document.documentElement;
+
+        // Carregar tema salvo
+        const savedTheme = localStorage.getItem("theme");
+
+        if (savedTheme === "dark") {
+            root.setAttribute("data-theme", "dark");
+            icon.className = "bi bi-moon-fill";
+        } else {
+            icon.className = "bi bi-sun-fill";
+        }
+
+        // Alternar tema
+        themeToggle.addEventListener("click", () => {
+            const isDark = root.getAttribute("data-theme") === "dark";
+
+            if (isDark) {
+                root.removeAttribute("data-theme");
+                localStorage.setItem("theme", "light");
+                icon.className = "bi bi-sun-fill";
+            } else {
+                root.setAttribute("data-theme", "dark");
+                localStorage.setItem("theme", "dark");
+                icon.className = "bi bi-moon-fill";
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
